@@ -5,6 +5,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const corsMiddleware = Cors({
+  origin: "*",
   methods: ["GET", "POST", "OPTIONS"],
 });
 
@@ -40,24 +41,34 @@ export default async function handler(
   }
 
   if (req.method === "GET") {
-    const users = await prisma.user.findMany();
-    return res.status(200).json(users);
+    console.log("[GET] Listando usuários...");
+    try {
+      const users = await prisma.user.findMany();
+      return res.status(200).json(users);
+    } catch (err) {
+      console.error("[GET] Erro ao listar usuários:", err);
+      return res.status(500).json({ error: "Erro ao listar usuários" });
+    }
   }
 
   if (req.method === "POST") {
     const { name, email } = req.body;
+    console.log("[POST] Dados recebidos:", { name, email });
 
     try {
       const user = await prisma.user.create({
         data: { name, email },
       });
+      console.log("[POST] Usuário criado com sucesso:", user);
       return res.status(201).json(user);
     } catch (error: any) {
+      console.error("[POST] Erro ao criar usuário:", error);
       return res
         .status(400)
         .json({ error: "Erro ao criar usuário", details: error?.message });
     }
   }
 
+  console.warn("[API] Método não permitido:", req.method);
   return res.status(405).json({ message: "Método não permitido" });
 }

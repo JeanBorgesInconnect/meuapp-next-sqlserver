@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 
 interface User {
@@ -15,11 +14,29 @@ export default function TestApiPage() {
     const [error, setError] = useState("");
     const env = process.env.NEXT_PUBLIC_APP_ENV || "unknown";
 
-
     const fetchUsers = async () => {
-        const res = await fetch("/api/users");
-        const data = await res.json();
-        setUsers(data);
+        try {
+            const res = await fetch("/api/users");
+            const contentType = res.headers.get("content-type");
+
+            if (!res.ok || !contentType?.includes("application/json")) {
+                console.error("Erro ao buscar usuários");
+                setUsers([]);
+                return;
+            }
+
+            const data = await res.json();
+
+            if (Array.isArray(data)) {
+                setUsers(data);
+            } else {
+                console.error("Resposta inesperada:", data);
+                setUsers([]);
+            }
+        } catch (error) {
+            console.error("Erro ao buscar usuários:", error);
+            setUsers([]);
+        }
     };
 
     useEffect(() => {
@@ -30,20 +47,24 @@ export default function TestApiPage() {
         setLoading(true);
         setError("");
 
-        const res = await fetch("/api/users", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email }),
-        });
+        try {
+            const res = await fetch("/api/users", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email }),
+            });
 
-        const data = await res.json();
+            const data = await res.json();
 
-        if (!res.ok) {
-            setError(data?.error || "Erro ao criar usuário.");
-        } else {
-            setName("");
-            setEmail("");
-            fetchUsers();
+            if (!res.ok) {
+                setError(data?.error || "Erro ao criar usuário.");
+            } else {
+                setName("");
+                setEmail("");
+                fetchUsers();
+            }
+        } catch (err) {
+            setError("Erro na requisição. Tente novamente.");
         }
 
         setLoading(false);
@@ -52,10 +73,7 @@ export default function TestApiPage() {
     return (
         <div style={{ maxWidth: 500, margin: "0 auto", padding: 32 }}>
             <h1>👤 Cadastro de Usuários</h1>
-
-
-            <p style={{ color: "#888", fontSize: 14 }}>Ambienteeee: {env}</p>
-
+            <p style={{ color: "#888", fontSize: 14 }}>Ambiente 2: {env}</p>
 
             <div style={{ marginBottom: 16 }}>
                 <input
@@ -80,20 +98,26 @@ export default function TestApiPage() {
 
             <h2>📋 Lista de Usuários</h2>
             <ul style={{ padding: 0 }}>
-                {users.map((user) => (
-                    <li
-                        key={user.id}
-                        style={{
-                            listStyle: "none",
-                            borderBottom: "1px solid #ddd",
-                            padding: "8px 0",
-                        }}
-                    >
-                        <strong>{user.name}</strong>
-                        <br />
-                        <span style={{ color: "#555" }}>{user.email}</span>
+                {Array.isArray(users) && users.length > 0 ? (
+                    users.map((user) => (
+                        <li
+                            key={user.id}
+                            style={{
+                                listStyle: "none",
+                                borderBottom: "1px solid #ddd",
+                                padding: "8px 0",
+                            }}
+                        >
+                            <strong>{user.name}</strong>
+                            <br />
+                            <span style={{ color: "#555" }}>{user.email}</span>
+                        </li>
+                    ))
+                ) : (
+                    <li style={{ color: "#aaa", listStyle: "none" }}>
+                        Nenhum usuário encontrado.
                     </li>
-                ))}
+                )}
             </ul>
         </div>
     );

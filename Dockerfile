@@ -4,7 +4,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install && npx prisma generate
 
 COPY . .
 RUN npm run build
@@ -14,10 +14,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copia os arquivos da etapa anterior
 COPY --from=builder /app ./
 
 ENV NODE_ENV=production
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["npx", "next", "start"]

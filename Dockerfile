@@ -1,30 +1,40 @@
-# Etapa 1: Build da aplicação
+# Etapa 1: build da aplicação
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Copia e instala dependências
 COPY package.json package-lock.json ./
 RUN npm install
 
+# Copia a pasta do Prisma antes de gerar o client
+COPY prisma ./prisma
+RUN npx prisma generate
+
+# Copia o restante do código
 COPY . .
+
+# Build da aplicação
 RUN npm run build
 
-# Etapa 2: Imagem final e leve com SSH
+---
+
+# Etapa 2: imagem final com shell acessível
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Instala o OpenSSH no Alpine
-RUN apk update && apk add --no-cache openssh
+# Instala o shell (bash ou sh)
+RUN apk add --no-cache bash
 
-# Cria o diretório do SSH
-RUN mkdir /var/run/sshd
+# Copia todos os arquivos da build
+COPY --from=builder /app .
 
-# Copia os arquivos da etapa anterior
-COPY --from=builder /app ./
-
-ENV NODE_ENV=production
+# Exporta a porta
 EXPOSE 3000
 
-# Comando para manter o container "vivo" e com terminal aberto
+# Define o ambiente de produção
+ENV NODE_ENV=production
+
+# 👉 Comando para manter o terminal ativo no Azure
 CMD ["/bin/sh"]

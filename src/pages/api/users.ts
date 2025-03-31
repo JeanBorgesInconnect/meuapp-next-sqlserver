@@ -62,7 +62,7 @@ export default async function handler(
       console.log("[POST] Usuário criado com sucesso:", user);
       return res.status(201).json(user);
     } catch (error: any) {
-      console.error("[POST] Erro ao criar usuário:", error);
+      console.error("Erro ao criar usuário:", error);
       return res
         .status(400)
         .json({ error: "Erro ao criar usuário", details: error?.message });

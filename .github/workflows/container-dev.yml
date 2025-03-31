@@ -1,0 +1,29 @@
+name: Build e Push - DEV
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repositório
+        uses: actions/checkout@v3
+
+      - name: Login no Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.DEV_DOCKER_REGISTRY }}
+          username: ${{ secrets.DEV_DOCKER_USERNAME }}
+          password: ${{ secrets.DEV_DOCKER_PASSWORD }}
+
+      - name: Build da imagem Docker
+        run: |
+          docker build -t ${{ secrets.DEV_DOCKER_IMAGE }} .
+
+      - name: Push da imagem para o ACR
+        run: |
+          docker push ${{ secrets.DEV_DOCKER_IMAGE }}

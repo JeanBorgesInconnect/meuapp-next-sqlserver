@@ -1,22 +1,26 @@
 # Etapa 1: Build da aplicação
-FROM node:20-alpine AS builder
+FROM node:18 AS builder
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm install && npx prisma generate
+RUN npm install
 
+# Copia o restante do projeto, incluindo schema.prisma
 COPY . .
+
+# Gera o cliente Prisma
+RUN npx prisma generate
+
 RUN npm run build
 
-# Etapa 2: Imagem final e leve
-FROM node:20-alpine
+# Etapa 2: Imagem final
+FROM node:18-slim
 
 WORKDIR /app
 
 COPY --from=builder /app ./
 
-ENV NODE_ENV=production
 EXPOSE 3000
 
-CMD ["npx", "next", "start"]
+CMD ["npm", "start"]

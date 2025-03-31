@@ -17,8 +17,6 @@ COPY . .
 # Build da aplicação
 RUN npm run build
 
----
-
 # Etapa 2: imagem final com shell acessível
 FROM node:20-alpine
 
@@ -36,5 +34,5 @@ EXPOSE 3000
 # Define o ambiente de produção
 ENV NODE_ENV=production
 
-# 👉 Comando para manter o terminal ativo no Azure
+# Comando para manter o terminal ativo no WebSSH do Azure
 CMD ["/bin/sh"]

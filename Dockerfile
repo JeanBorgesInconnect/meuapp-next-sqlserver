@@ -9,6 +9,7 @@ RUN npm install
 
 # Copia apenas a pasta prisma antes do generate
 COPY prisma ./prisma
+ENV DATABASE_URL="sqlserver://dummy:dummy@localhost:1433?database=dummy&encrypt=true"
 RUN npx prisma generate
 
 # Agora sim, copia o resto do código

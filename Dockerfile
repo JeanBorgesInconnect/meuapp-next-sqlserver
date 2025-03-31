@@ -3,15 +3,18 @@ FROM node:18 AS builder
 
 WORKDIR /app
 
+# Instala dependências
 COPY package.json package-lock.json ./
 RUN npm install
 
-# Copia o restante do projeto, incluindo schema.prisma
-COPY . .
-
-# Gera o cliente Prisma
+# Copia apenas a pasta prisma antes do generate
+COPY prisma ./prisma
 RUN npx prisma generate
 
+# Agora sim, copia o resto do código
+COPY . .
+
+# Build da aplicação
 RUN npm run build
 
 # Etapa 2: Imagem final

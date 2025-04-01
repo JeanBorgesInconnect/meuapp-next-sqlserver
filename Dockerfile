@@ -3,19 +3,16 @@ FROM node:18 AS builder
 
 WORKDIR /app
 
-# Instala dependências
 COPY package.json package-lock.json ./
 RUN npm install
 
-# Copia apenas a pasta prisma antes do generate
+# Copia schema do Prisma e gera o client
 COPY prisma ./prisma
-ENV DATABASE_URL="sqlserver://meuappsqlserver.database.windows.net:1433;database=meuapp_dev;user=sqladmin;password=JeanDev123;encrypt=true"
-RUN npx prisma generate
+RUN npx prisma generate --data-proxy
 
-# Agora sim, copia o resto do código
+# Copia o restante do projeto
 COPY . .
 
-# Build da aplicação
 RUN npm run build
 
 # Etapa 2: Imagem final
@@ -23,11 +20,8 @@ FROM node:18-slim
 
 WORKDIR /app
 
-# Copia os arquivos da etapa anterior
-COPY --from=builder /app ./
+COPY --from=builder /app .
 
-# Define porta
 EXPOSE 3000
 
-# Define o comando de execução
 CMD ["npm", "start"]

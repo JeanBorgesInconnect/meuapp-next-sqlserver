@@ -19,6 +19,9 @@ export default function TestApiPage() {
             const res = await fetch("/api/users");
             const contentType = res.headers.get("content-type");
 
+            console.log("Response Headers:", res.headers);
+            console.log("Response Status:", res.status);
+
             if (!res.ok || !contentType?.includes("application/json")) {
                 console.error("Erro ao buscar usuários");
                 setUsers([]);

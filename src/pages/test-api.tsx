@@ -95,7 +95,7 @@ export default function TestApiPage() {
           style={inputStyle}
         />
         <button onClick={handleCreateUser} disabled={loading} style={btnStyle}>
-          {loading ? "Salvando..." : "Salvar Usuário"}
+          {loading ? "Salvando..." : "Salvar Usuário."}
         </button>
         {error && <p style={{ color: "red" }}>{error}</p>}
       </div>

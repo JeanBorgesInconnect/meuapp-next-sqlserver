@@ -8,7 +8,8 @@ RUN npm install
 
 # Copia schema do Prisma e gera o client
 COPY prisma ./prisma
-RUN npx prisma generate --data-proxy
+RUN npx prisma generate
+
 
 # Copia o restante do projeto
 COPY . .
